@@ -23,7 +23,7 @@ def serverLoop():
       print ('List of peers sent to server: ', list)
       conn.send(pickle.dumps(list))
     elif req["op"] == "unregister":
-      // to do
+      # to do
       pass
     elif req["op"] == "stop":
       print("Stopping.")
