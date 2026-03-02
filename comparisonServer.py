@@ -28,7 +28,8 @@ def mainLoop():
 		else:
 			print('Stopping.')
 			serverSock.close()
-			// Tell group manager to stop
+			
+			# Tell group manager to stop
 			clientSock.connect((GROUPMNGR_ADDR,GROUPMNGR_TCP_PORT))
 			req = {"op":"stop"}
 			msg = pickle.dumps(req)
