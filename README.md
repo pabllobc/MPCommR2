@@ -4,17 +4,16 @@ Very simple demo of multicast communication without coordination. The intent is 
 ## Overall structure
 A set of peer processes is established and each process multicasts a sequence of messages to all the others at random intervals. Messages are stamped with the ID of the sending process and a local sequence number defined by the sending process. This is a simple attempt to demonstrate the problem of message ordering (or indeed the lack of it).
 
-The peer processes run the PeerCommunicatorUDP.py program, which has two separate threads, one for sending and the other for receiving messages. After starting, the peer processes wait for a signal in order to actually start multicasting the sequence of messages. Each peer collects all the received messages (in the order that they were received) and sends the list of messages to a server that will compare the order of messages as received by all the peer processes (as described next).
+The peer processes run the peerCommunicatorUDP.py program, which has two separate threads, one for sending and the other for receiving messages. After starting, the peer processes wait for a signal in order to actually start multicasting the sequence of messages. Each peer collects all the received messages (in the order that they were received) and sends the list of messages to a server that will compare the order of messages as received by all the peer processes (as described next).
 
-A separate process runs ComparisonServer.py, which, besides coordinating the start of the peer processes (by sending the start signal mentioned above), waits for the list of received messages from each peer and compares their order. It reports metric that indicates the occurrence of out-of-order messages (the number of rounds in which at least one process received a different message form the others). Importantly, we assume that no messages are lost, so that, in an ideal scenario, all processes should receive the same messages in the same order. Note, however, that the current version does not use a reliable message communication protocol to ensure that messages are not lost (this can be an improvement to be implemented as an assignment).
+A separate process runs comparisonServer.py, which, besides coordinating the start of the peer processes (by sending the start signal mentioned above), waits for the list of received messages from each peer and compares their order. It reports metric that indicates the occurrence of out-of-order messages (the number of rounds in which at least one process received a different message form the others). Importantly, we assume that no messages are lost, so that, in an ideal scenario, all processes should receive the same messages in the same order. Note, however, that the current version does not use a reliable message communication protocol to ensure that messages are not lost (this can be an improvement to be implemented as an assignment).
 
-A second server process, running GroupManager.py, is used for peers to register themselves (notably their IP addresses) as well as to discover the other peers.
+A second server process, running GroupMngr.py, is used for peers to register themselves (notably their IP addresses) as well as to discover the other peers.
 
 In order to actually see the problem of message ordering, it is necessary to introduce variability on message communication latency, such as by running the peer processes on different networks, e.g., running some of the peers in one region of the cloud, whereas the others are run on another region. This illustrates the issue of geographic scalability, when the system works fine when all its components are in the same network, but starts to behave erroneously when its components are spread across the Internet.
 
 ## Setup
-- Create one instance (virtual machine in the cloud) to run the two servers, and a number of instances (e.g., 6) to run the peers.
-- On the first instance:
-  - Run GroupManager.py in the background
-  - Run ComparisonServer.py and interact with it to control the experiment (setting the number of messages to be sent by the peers)
-- On the other instances: run PeerCommunicator.py
+- Create one instance (virtual machine in the cloud) to run the two servers, and a number of instances (e.g., 6 in one cloud region, 2 on another) to run the peers.
+- On the first instance, run GroupMngr.py in the background
+- On the other instances: run peerCommunicator.py
+- Back on the first instance: run comparisonServer.py
