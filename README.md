@@ -15,6 +15,6 @@ In order to actually see the problem of message ordering, it is necessary to int
 ## Setup
 - Create one instance (virtual machine in the cloud) to run the two servers, and a number of instances (e.g., 6) to run the peers.
 - On the first instance:
--- Run GroupManager.py in the background
--- Run ComparisonServer.py and interact with it to control the experiment (setting the number of messages to be sent by the peers)
+  - Run GroupManager.py in the background
+  - Run ComparisonServer.py and interact with it to control the experiment (setting the number of messages to be sent by the peers)
 - On the other instances: run PeerCommunicator.py
