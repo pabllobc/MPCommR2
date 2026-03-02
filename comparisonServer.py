@@ -10,9 +10,9 @@ serverSock.listen(6)
 
 def mainLoop():
 	cont = 1
+	clientSock = socket(AF_INET, SOCK_STREAM)
 	while 1:
 		nMsgs = promptUser()
-		clientSock = socket(AF_INET, SOCK_STREAM)
 		clientSock.connect((GROUPMNGR_ADDR,GROUPMNGR_TCP_PORT))
 		req = {"op":"list"}
 		msg = pickle.dumps(req)
@@ -28,6 +28,12 @@ def mainLoop():
 		else:
 			print('Stopping.')
 			serverSock.close()
+			// Tell group manager to stop
+			clientSock.connect((GROUPMNGR_ADDR,GROUPMNGR_TCP_PORT))
+			req = {"op":"stop"}
+			msg = pickle.dumps(req)
+			clientSock.send(msg)
+			clientSock.close()
 			break
 
 def promptUser():
