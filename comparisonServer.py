@@ -12,8 +12,6 @@ def mainLoop():
 	cont = 1
 	while 1:
 		nMsgs = promptUser()
-		if nMsgs == 0:
-			break
 		clientSock = socket(AF_INET, SOCK_STREAM)
 		clientSock.connect((GROUPMNGR_ADDR,GROUPMNGR_TCP_PORT))
 		req = {"op":"list"}
@@ -24,9 +22,13 @@ def mainLoop():
 		peerList = pickle.loads(msg)
 		print("List of Peers: ", peerList)
 		startPeers(peerList,nMsgs)
-		print('Now, wait for the message logs from the communicating peers...')
-		waitForLogsAndCompare(nMsgs)
-	serverSock.close()
+		if nMsgs != 0:
+			print('Now, wait for the message logs from the communicating peers...')
+			waitForLogsAndCompare(nMsgs)
+		else:
+			print('Stopping.')
+			serverSock.close()
+			break
 
 def promptUser():
 	nMsgs = int(input('Enter the number of messages for each peer to send (0 to terminate)=> '))
