@@ -18,10 +18,14 @@ PEERS = []
 sendSocket = socket(AF_INET, SOCK_DGRAM)
 #Create and bind receive socket
 recvSocket = socket(AF_INET, SOCK_DGRAM)
+# Allow immediate reuse of the port after closing
+recvSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 recvSocket.bind(('0.0.0.0', PEER_UDP_PORT))
 
 # TCP socket to receive start signal from the comparison server:
 serverSock = socket(AF_INET, SOCK_STREAM)
+# Allow immediate reuse of the port after closing
+serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind(('0.0.0.0', PEER_TCP_PORT))
 serverSock.listen(1)
 
