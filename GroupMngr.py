@@ -7,6 +7,8 @@ membership = []
 
 def serverLoop():
   serverSock = socket(AF_INET, SOCK_STREAM)
+  # Allow immediate reuse of the port after closing
+  serverSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   serverSock.bind(('0.0.0.0', port))
   serverSock.listen(6)
   while(1):
