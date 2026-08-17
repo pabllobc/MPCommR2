@@ -1,4 +1,4 @@
-# MPComm - Multipoint Communication
+# MPComm - Multiparty Communication
 Very simple demo of multicast communication without coordination. The intent is to demonstrate how things can go wrong as we scale a distributed system (in this case, scaling in the geographical dimension) without taking appropriate measures to coordinate the behavior of its components. Later, this example will serve as the basis to implement coordination protocols, notably for the message ordering, as part of course assignments.
 
 ## Overall structure
