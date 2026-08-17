@@ -16,5 +16,5 @@ In order to actually see the problem of message ordering, it is necessary to int
 - Create one instance (virtual machine in the cloud) to run the two servers, and a number of instances (e.g., 6 in one cloud region, 2 on another) to run the peers.
 - Edit *constMP.py* with the correct IP address of the instance where the two servers will run. Tip: allocate a fixed IP address (elastic IP in AWS jargon) to the server instance. Also edit the file to configure the number of peers processes in the experiment.
 - On the server instance, run *GroupMngr.py*
-- On some of the peer instances: run peerCommunicator.py
-- Back on the server instance: run comparisonServer.py
+- On some of the peer instances: run *peerCommunicator.py*
+- Back on the server instance: run *comparisonServer.py*
