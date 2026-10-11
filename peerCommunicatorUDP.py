@@ -1,10 +1,14 @@
 from socket  import *
 from constMP import * #-
+import os
 import threading
 import random
 import time
 import pickle
 from requests import get
+
+# Optional per-process bind address. Empty/0.0.0.0 keeps the original all-interfaces bind.
+BIND_ADDR = os.environ.get('MPCOMM_BIND_ADDR', '0.0.0.0')
 
 #handShakes = [] # not used; only if we need to check whose handshake is missing
 
@@ -20,18 +24,31 @@ sendSocket = socket(AF_INET, SOCK_DGRAM)
 recvSocket = socket(AF_INET, SOCK_DGRAM)
 # Allow immediate reuse of the port after closing
 recvSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-recvSocket.bind(('0.0.0.0', PEER_UDP_PORT))
+recvSocket.bind((BIND_ADDR, PEER_UDP_PORT))
 
 # TCP socket to receive start signal from the comparison server:
 serverSock = socket(AF_INET, SOCK_STREAM)
 # Allow immediate reuse of the port after closing
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-serverSock.bind(('0.0.0.0', PEER_TCP_PORT))
+serverSock.bind((BIND_ADDR, PEER_TCP_PORT))
 serverSock.listen(1)
 
 
+# def get_public_ip():
+#   ipAddr = get('https://api.ipify.org').content.decode('utf8')
+#   print('My public IP address is: {}'.format(ipAddr))
+#   return ipAddr
+
 def get_public_ip():
-  ipAddr = get('https://api.ipify.org').content.decode('utf8')
+  """Return the address registered with the group manager.
+
+  A local multi-peer run sets MPCOMM_BIND_ADDR to a distinct loopback
+  alias so several processes can share the same UDP/TCP port numbers.
+  """
+  if BIND_ADDR != '0.0.0.0':
+    ipAddr = BIND_ADDR
+  else:
+    ipAddr = '127.0.0.1'
   print('My public IP address is: {}'.format(ipAddr))
   return ipAddr
 
@@ -76,6 +93,7 @@ class MsgHandler(threading.Thread):
     
     # Wait until handshakes are received from all other processes
     # (to make sure that all processes are synchronized before they start exchanging messages)
+    pending = []
     while handShakeCount < N:
       msgPack = self.sock.recv(1024)
       msg = pickle.loads(msgPack)
@@ -87,11 +105,22 @@ class MsgHandler(threading.Thread):
         handShakeCount = handShakeCount + 1
         #handShakes[msg[1]] = 1
         print('--- Handshake received: ', msg[1])
+      else:
+        # Keep early data/stop messages so the receive loop can collect them.
+        pending.append(msg)
 
     print('Secondary Thread: Received all handshakes. Entering the loop to receive messages.')
 
-    stopCount=0 
-    while True:                
+    stopCount=0
+    for msg in pending:
+      if msg[0] == -1:
+        stopCount = stopCount + 1
+        if stopCount == N:
+          break
+      else:
+        print('Message ' + str(msg[1]) + ' from process ' + str(msg[0]))
+        logList.append(msg)
+    while stopCount < N:
       msgPack = self.sock.recv(1024)   # receive data from client
       msg = pickle.loads(msgPack)
       if msg[0] == -1:   # count the 'stop' messages from the other processes

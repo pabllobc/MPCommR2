@@ -18,3 +18,122 @@ In order to actually see the problem of message ordering, it is necessary to int
 - On the server instance, run *GroupMngr.py*
 - On some of the peer instances: run *peerCommunicator.py*
 - Back on the server instance: run *comparisonServer.py*
+
+## Total-order implementation
+
+The P-A6 implementation keeps the original baseline files and adds a separate
+ordered execution path:
+
+- `reliableFifoUDP.py`: stop-and-wait reliability and FIFO per directed UDP link.
+- `totalOrderMulticast.py`: Lamport clock, holdback queue, explicit acknowledgments,
+  deterministic ordering, and application delivery.
+- `peerCommunicatorOrdered.py`: peer control, finite workload, and separate logs.
+- `comparisonServerOrdered.py`: fixed-group orchestration and complete validation.
+- `run_ordered_local.py`: reproducible multi-peer execution on one Windows host.
+- `test_totalOrderMulticast.py`: deterministic state-machine tests.
+
+The coordinator freezes membership and assigns stable peer IDs before it sends
+`GO`. It does not choose the order. Every peer orders DATA by:
+
+```text
+(lamport, sender_id, application_sequence)
+```
+
+A DATA message is delivered to the application only when it is at the head of
+the holdback queue and has an `ORDER_ACK` from every peer. `LINK_ACK` belongs
+only to the reliable UDP layer and must not be confused with `ORDER_ACK`.
+
+### Environment
+
+The validated local environment is:
+
+```text
+CPython 3.13.14
+requests 2.34.2
+```
+
+No new package is required.
+
+For a local three-peer run, `constMP.py` uses:
+
+```python
+N = 3
+SERVER_ADDR = '127.0.0.1'
+GROUPMNGR_ADDR = '127.0.0.1'
+```
+
+### Automated local execution
+
+From the MPComm directory:
+
+```powershell
+python -B -m unittest -v test_totalOrderMulticast.py
+python -B run_ordered_local.py 5 `
+  "c:\temp\mpcomm-ordered" `
+  127.0.0.1 127.0.0.2 127.0.0.3
+```
+
+The first argument is `K`, the number of messages sent by each peer. With
+`N = 3` and `K = 5`, every peer must deliver `X = N × K = 15` unique messages.
+
+The runner starts, in order:
+
+1. `GroupMngr.py`;
+2. three instances of `peerCommunicatorOrdered.py`;
+3. `comparisonServerOrdered.py`.
+
+The coordinator sends `K` and then `0`, so the experiment terminates without
+manual input. Success requires zero exit status from the coordinator, all peers,
+and GroupMngr.
+
+### Evidence files
+
+Each peer writes:
+
+```text
+arrival-peer-<id>.log
+delivery-peer-<id>.log
+protocol-peer-<id>.log
+```
+
+Arrival order is the order in which each DATA enters the protocol. Delivery
+order is the only order exposed to the application. Arrival sequences may
+differ; all delivery sequences must be identical.
+
+The coordinator validates all peers and all positions:
+
+- length is exactly `N × K`;
+- no duplicate identifier exists;
+- no identifier is missing or unexpected;
+- all delivery lists are identical;
+- all peer and group processes terminate after the reliable queues drain.
+
+### Manual multi-machine execution
+
+Set `N`, `SERVER_ADDR`, and `GROUPMNGR_ADDR` identically on all machines. Allow:
+
+- TCP 5680 to GroupMngr;
+- TCP 5678 to the ordered comparison server;
+- TCP 5679 to every peer;
+- UDP 6789 between every pair of peers.
+
+Start `GroupMngr.py`, then `peerCommunicatorOrdered.py` on every peer machine,
+and finally `comparisonServerOrdered.py` on the coordinator. Do not enter `K`
+until all registrations are visible in GroupMngr.
+
+This version assumes a fixed, crash-free group for a successful round. Transient
+UDP loss, duplication, reordering, and delay are handled. A crashed peer or
+permanent partition causes an explicit timeout instead of partial success.
+
+## Mapping to Figure 5.10
+
+- `requestToEnter` corresponds to `TotalOrderMulticast.multicast`.
+- `ackToEnter` corresponds to creation and multicast of `ORDER_ACK`.
+- `allowedToEnter` corresponds to `_try_deliver_locked`.
+- `receive` corresponds to `receive_network`, `_accept_data_locked`, and
+  `_accept_order_ack_locked`.
+- `release` corresponds to removing the safely delivered head and its ACK state.
+- `cleanupQ` corresponds to heap ordering and cleanup of per-message state.
+
+The figure provides the Lamport coordination mechanism. Its mutual-exclusion
+messages are not copied literally into the message-delivery protocol.

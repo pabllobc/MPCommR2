@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+
+# Experiment output
+arrival-peer-*.log
+delivery-peer-*.log
+protocol-peer-*.log
+logfile*.log
+
+# Local research and Cursor configuration
+.cursor/
+documents/
+originais/
