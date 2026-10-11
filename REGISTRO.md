@@ -35,3 +35,7 @@
 ## 2026-10-11 — testes locais P-A7
 - Por quê: as garantias de segurança, progresso e encerramento precisavam ser verificadas sob atraso, reordenação, duplicação e perda controlada.
 - O quê: ampliar os testes do motor de ordenação, adicionar injeção de falhas no enlace UDP confiável e documentar o limite explícito para partição permanente.
+
+## 2026-10-11 — preparação AWS P-A8
+- Por quê: oito peers em duas regiões precisam executar o mesmo commit sem editar endereços diferentes no código.
+- O quê: aceitar grupo, coordenador e endereço anunciado por variáveis de ambiente e adicionar validação integral dos logs coletados.

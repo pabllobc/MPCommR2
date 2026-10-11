@@ -116,7 +116,23 @@ The coordinator validates all peers and all positions:
 
 ### Manual multi-machine execution
 
-Set `N`, `SERVER_ADDR`, and `GROUPMNGR_ADDR` identically on all machines. Allow:
+Use the same commit on every machine and export:
+
+```bash
+export MPCOMM_N=8
+export MPCOMM_SERVER_ADDR="<coordinator-public-ip>"
+export MPCOMM_GROUPMNGR_ADDR="<coordinator-public-ip>"
+```
+
+Each peer also exports its own advertised public address while continuing to
+bind its socket to all local interfaces:
+
+```bash
+export MPCOMM_BIND_ADDR="0.0.0.0"
+export MPCOMM_ADVERTISE_ADDR="<this-peer-public-ip>"
+```
+
+Allow:
 
 - TCP 5680 to GroupMngr;
 - TCP 5678 to the ordered comparison server;
@@ -126,6 +142,13 @@ Set `N`, `SERVER_ADDR`, and `GROUPMNGR_ADDR` identically on all machines. Allow:
 Start `GroupMngr.py`, then `peerCommunicatorOrdered.py` on every peer machine,
 and finally `comparisonServerOrdered.py` on the coordinator. Do not enter `K`
 until all registrations are visible in GroupMngr.
+
+After collecting every peer log into one directory, validate the complete
+message sets and position-by-position delivery order with:
+
+```bash
+python -B validate_ordered_logs.py <evidence-directory> 8 <K>
+```
 
 This version assumes a fixed, crash-free group for a successful round. Transient
 UDP loss, duplication, reordering, and delay are handled. A crashed peer or
