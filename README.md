@@ -31,6 +31,7 @@ ordered execution path:
 - `comparisonServerOrdered.py`: fixed-group orchestration and complete validation.
 - `run_ordered_local.py`: reproducible multi-peer execution on one Windows host.
 - `test_totalOrderMulticast.py`: deterministic state-machine tests.
+- `test_reliableFifoUDP.py`: link fault-injection and recovery tests.
 
 The coordinator freezes membership and assigns stable peer IDs before it sends
 `GO`. It does not choose the order. Every peer orders DATA by:
@@ -67,11 +68,16 @@ GROUPMNGR_ADDR = '127.0.0.1'
 From the MPComm directory:
 
 ```powershell
-python -B -m unittest -v test_totalOrderMulticast.py
+python -B -m unittest -v `
+  test_totalOrderMulticast.py test_reliableFifoUDP.py
 python -B run_ordered_local.py 5 `
   "c:\temp\mpcomm-ordered" `
   127.0.0.1 127.0.0.2 127.0.0.3
 ```
+
+The deterministic suite covers equal Lamport timestamps, delayed lower DATA,
+delayed `ORDER_ACK`, duplicate protocol DATA, transient packet and link-ACK
+loss, wire duplication, per-link reordering, and permanent-loss failure.
 
 The first argument is `K`, the number of messages sent by each peer. With
 `N = 3` and `K = 5`, every peer must deliver `X = N × K = 15` unique messages.
