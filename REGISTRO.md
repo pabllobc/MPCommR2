@@ -31,3 +31,7 @@
 ## 2026-10-11 — baseline sem ordenação
 - Por quê: o comparador original omitia o último peer e a última posição e fazia uma única leitura TCP.
 - O quê: preservar o original, validar logs completos e habilitar três peers locais por aliases de loopback.
+
+## 2026-10-11 — testes locais P-A7
+- Por quê: as garantias de segurança, progresso e encerramento precisavam ser verificadas sob atraso, reordenação, duplicação e perda controlada.
+- O quê: ampliar os testes do motor de ordenação, adicionar injeção de falhas no enlace UDP confiável e documentar o limite explícito para partição permanente.
