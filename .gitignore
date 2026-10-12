@@ -7,7 +7,7 @@ delivery-peer-*.log
 protocol-peer-*.log
 logfile*.log
 
-# Local research and Cursor configuration
+# Local research configuration
 .cursor/
 documents/
 originais/
