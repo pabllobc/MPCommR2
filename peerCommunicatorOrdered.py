@@ -16,6 +16,7 @@ from totalOrderMulticast import TotalOrderMulticast
 
 
 BIND_ADDR = os.environ.get('MPCOMM_BIND_ADDR', '0.0.0.0')
+ADVERTISE_ADDR = os.environ.get('MPCOMM_ADVERTISE_ADDR')
 
 
 def recvAll(conn):
@@ -30,8 +31,10 @@ def recvAll(conn):
 
 
 def getPublicIp():
-  """Return a local bind alias or discover this peer's public address."""
-  if BIND_ADDR != '0.0.0.0':
+  """Return the explicit advertised address or discover a public address."""
+  if ADVERTISE_ADDR:
+    ipAddr = ADVERTISE_ADDR
+  elif BIND_ADDR != '0.0.0.0':
     ipAddr = BIND_ADDR
   else:
     ipAddr = get('https://api.ipify.org', timeout=5).content.decode('utf8')
