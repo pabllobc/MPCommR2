@@ -39,3 +39,7 @@
 ## 2026-10-11 — preparação AWS P-A8
 - Por quê: oito peers em duas regiões precisam executar o mesmo commit sem editar endereços diferentes no código.
 - O quê: aceitar grupo, coordenador e endereço anunciado por variáveis de ambiente e adicionar validação integral dos logs coletados.
+
+## 2026-10-12 — benchmark P-A9
+- Por quê: a análise de complexidade e desempenho precisa de medições comparáveis, dados brutos e estatística descritiva.
+- O quê: adicionar benchmark local com `time.monotonic_ns`, validação de perdas, resumo CSV/JSON e gráfico SVG sem nova dependência.

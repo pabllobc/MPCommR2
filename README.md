@@ -32,6 +32,7 @@ ordered execution path:
 - `run_ordered_local.py`: reproducible multi-peer execution on one Windows host.
 - `test_totalOrderMulticast.py`: deterministic state-machine tests.
 - `test_reliableFifoUDP.py`: link fault-injection and recovery tests.
+- `benchmark_mpcomm.py`: comparable baseline-versus-ordered benchmark.
 
 The coordinator freezes membership and assigns stable peer IDs before it sends
 `GO`. It does not choose the order. Every peer orders DATA by:
@@ -91,6 +92,25 @@ The runner starts, in order:
 The coordinator sends `K` and then `0`, so the experiment terminates without
 manual input. Success requires zero exit status from the coordinator, all peers,
 and GroupMngr.
+
+### Local benchmark
+
+The benchmark measures a complete automated round in the parent process with
+`time.monotonic_ns`, so it does not compare clocks from different machines.
+Both variants use self-delivery: if every one of `N` peers sends `K` messages,
+each receiver records or delivers `X = N x K` application messages.
+
+```powershell
+python -B benchmark_mpcomm.py `
+  "c:\temp\mpcomm-benchmark" `
+  --messages 5,10,15 `
+  --repetitions 5 `
+  --bind-addrs 127.0.0.1 127.0.0.2 127.0.0.3
+```
+
+The output directory keeps raw JSONL/CSV, per-run logs, summary CSV/JSON, and
+an SVG chart. Repetitions with missing or duplicated identifiers are marked as
+failures instead of being treated as successful measurements.
 
 ### Evidence files
 
