@@ -8,7 +8,8 @@ serverSock = socket(AF_INET, SOCK_STREAM)
 # Allow immediate reuse of the port after closing
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind(('0.0.0.0', SERVER_PORT))
-serverSock.listen(6)
+# Accept one complete log from every peer. The backlog must cover N uploads.
+serverSock.listen(max(16, N * 2))
 
 def recvAll(conn):
 	"""Read the complete TCP payload until the peer closes the connection."""

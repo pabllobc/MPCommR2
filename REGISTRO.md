@@ -1,5 +1,9 @@
 # Registro de alterações
 
+## 2026-10-12 — comparisonServer.py
+- Por quê: com oito peers o comparador do baseline recusava o envio simultâneo dos logs, porque a fila de `listen` estava fixa em 6.
+- O quê: usar `listen(max(16, N * 2))`, o mesmo critério do GroupMngr e do comparador ordenado.
+
 ## 2026-10-11 — .gitignore e requirements.txt
 - Por quê: a publicação de E1 deve excluir logs, caches e documentos locais e declarar a única dependência externa do MPComm.
 - O quê: ignorar artefatos do experimento e fixar `requests==2.34.2`.
